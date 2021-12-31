@@ -1,0 +1,75 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.2.13.RELEASE</version>
+	</parent>
+	<groupId>com.javaru</groupId>
+	<version>1.0.0</version>
+	<artifactId>javaru-es-tool</artifactId>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		<fastjson.version>1.2.76</fastjson.version>
+		<commons.io.version>2.11.0</commons.io.version>
+		<elasticsearch.version>7.5.1</elasticsearch.version>
+		<spring-boot.version>2.2.13.RELEASE</spring-boot.version>
+		<oshi.version>5.8.0</oshi.version>
+		<jna.version>5.8.0</jna.version>
+		<javaru.version>3.6.0</javaru.version>
+	</properties>
+	<dependencies>
+		<!-- Mysql驱动包 -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+		</dependency>
+		<!-- 系统模块 -->
+		<dependency>
+			<groupId>com.javaru</groupId>
+			<artifactId>javaru-system-api</artifactId>
+			<version>${javaru.version}</version>
+		</dependency>
+		<!-- framework -->
+		<dependency>
+			<groupId>com.javaru</groupId>
+			<artifactId>javaru-framework</artifactId>
+			<version>${javaru.version}</version>
+		</dependency>
+		<!--code生成 -->
+		<dependency>
+			<groupId>com.javaru</groupId>
+			<artifactId>javaru-generator</artifactId>
+			<version>${javaru.version}</version>
+		</dependency>
+		<!--common-es -->
+
+		<!-- 获取系统信息 -->
+		<dependency>
+			<groupId>com.github.oshi</groupId>
+			<artifactId>oshi-core</artifactId>
+			<version>${oshi.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.java.dev.jna</groupId>
+			<artifactId>jna</artifactId>
+			<version>${jna.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.java.dev.jna</groupId>
+			<artifactId>jna-platform</artifactId>
+			<version>${jna.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.javaru</groupId>
+			<artifactId>javaru-common-es</artifactId>
+			<version>${javaru.version}</version>
+		</dependency>
+	</dependencies>
+</project>
