@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javaru.es.mapper.EsIndexMapper">
+    
+    <resultMap type="EsIndex" id="EsIndexResult">
+        <result property="indexId"    column="index_id"    />
+        <result property="indexName"    column="index_name"    />
+        <result property="indexShowName"    column="index_show_name"    />
+        <result property="status"    column="status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <resultMap id="EsIndexEsIndexColumnResult" type="EsIndex" extends="EsIndexResult">
+        <collection property="esIndexColumnList" notNullColumn="sub_column_id" javaType="java.util.List" resultMap="EsIndexColumnResult" />
+    </resultMap>
+
+    <resultMap type="EsIndexColumn" id="EsIndexColumnResult">
+        <result property="columnId"    column="sub_column_id"    />
+        <result property="indexId"    column="sub_index_id"    />
+        <result property="columnName"    column="sub_column_name"    />
+        <result property="columnShowName"    column="sub_column_show_name"    />
+        <result property="columnType"    column="sub_column_type"    />
+        <result property="columnFormat"    column="sub_column_format"    />
+        <result property="sort"    column="sub_sort"    />
+        <result property="createBy"    column="sub_create_by"    />
+        <result property="createTime"    column="sub_create_time"    />
+        <result property="updateBy"    column="sub_update_by"    />
+        <result property="updateTime"    column="sub_update_time"    />
+    </resultMap>
+
+    <sql id="selectEsIndexVo">
+        select index_id, index_name, index_show_name, status, create_by, create_time, update_by, update_time, remark from es_index
+    </sql>
+
+    <select id="selectEsIndexList" parameterType="EsIndex" resultMap="EsIndexResult">
+        <include refid="selectEsIndexVo"/>
+        <where>  
+            <if test="indexName != null  and indexName != ''"> and index_name like concat('%', #{indexName}, '%')</if>
+            <if test="indexShowName != null  and indexShowName != ''"> and index_show_name like concat('%', #{indexShowName}, '%')</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectEsIndexByIndexId" parameterType="Long" resultMap="EsIndexEsIndexColumnResult">
+        select a.index_id, a.index_name, a.index_show_name, a.status, a.create_by, a.create_time, a.update_by, a.update_time, a.remark,
+            b.column_id as sub_column_id, b.index_id as sub_index_id, b.column_name as sub_column_name, b.column_show_name as sub_column_show_name, b.column_type as sub_column_type, b.column_format as sub_column_format, b.sort as sub_sort, b.create_by as sub_create_by, b.create_time as sub_create_time, b.update_by as sub_update_by, b.update_time as sub_update_time
+        from es_index a
+        left join es_index_column b on b.index_id = a.index_id
+        where a.index_id = #{indexId}
+    </select>
+        
+    <insert id="insertEsIndex" parameterType="EsIndex" useGeneratedKeys="true" keyProperty="indexId">
+        insert into es_index
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="indexName != null">index_name,</if>
+            <if test="indexShowName != null">index_show_name,</if>
+            <if test="status != null and status != ''">status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="indexName != null">#{indexName},</if>
+            <if test="indexShowName != null">#{indexShowName},</if>
+            <if test="status != null and status != ''">#{status},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateEsIndex" parameterType="EsIndex">
+        update es_index
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="indexName != null">index_name = #{indexName},</if>
+            <if test="indexShowName != null">index_show_name = #{indexShowName},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where index_id = #{indexId}
+    </update>
+
+    <delete id="deleteEsIndexByIndexId" parameterType="Long">
+        delete from es_index where index_id = #{indexId}
+    </delete>
+
+    <delete id="deleteEsIndexByIndexIds" parameterType="String">
+        delete from es_index where index_id in 
+        <foreach item="indexId" collection="array" open="(" separator="," close=")">
+            #{indexId}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteEsIndexColumnByIndexIds" parameterType="String">
+        delete from es_index_column where index_id in 
+        <foreach item="indexId" collection="array" open="(" separator="," close=")">
+            #{indexId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteEsIndexColumnByIndexId" parameterType="Long">
+        delete from es_index_column where index_id = #{indexId}
+    </delete>
+
+    <insert id="batchEsIndexColumn">
+        insert into es_index_column( column_id, index_id, column_name, column_show_name, column_type, column_format, sort, create_by, create_time, update_by, update_time) values
+		<foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.columnId}, #{item.indexId}, #{item.columnName}, #{item.columnShowName}, #{item.columnType}, #{item.columnFormat}, #{item.sort}, #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime})
+        </foreach>
+    </insert>
+</mapper>
