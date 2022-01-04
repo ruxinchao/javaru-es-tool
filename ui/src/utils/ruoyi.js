@@ -16,7 +16,7 @@ export function parseTime(time, pattern) {
 		if ((typeof time === 'string') && (/^[0-9]+$/.test(time))) {
 			time = parseInt(time)
 		} else if (typeof time === 'string') {
-			time = time.replace(new RegExp(/-/gm), '/').replace('T', ' ').replace(new RegExp(/\.[\d]{3}/gm),'');
+			time = time.replace(new RegExp(/-/gm), '/').replace('T', ' ').replace(new RegExp(/\.[\d]{3}/gm), '');
 		}
 		if ((typeof time === 'number') && (time.toString().length === 10)) {
 			time = time * 1000
@@ -70,8 +70,8 @@ export function addDateRange(params, dateRange, propName) {
 export function selectDictLabel(datas, value) {
 	var actions = [];
 	Object.keys(datas).some((key) => {
-		if (datas[key].value == ('' + value)) {
-			actions.push(datas[key].label);
+		if (datas[key].dictValue == ('' + value)) {
+			actions.push(datas[key].dictLabel);
 			return true;
 		}
 	})
@@ -85,8 +85,8 @@ export function selectDictLabels(datas, value, separator) {
 	var temp = value.split(currentSeparator);
 	Object.keys(value.split(currentSeparator)).some((val) => {
 		Object.keys(datas).some((key) => {
-			if (datas[key].value == ('' + temp[val])) {
-				actions.push(datas[key].label + currentSeparator);
+			if (datas[key].dictValue == ('' + temp[val])) {
+				actions.push(datas[key].dictLabel + currentSeparator);
 			}
 		})
 	})
@@ -117,18 +117,18 @@ export function parseStrEmpty(str) {
 
 // 数据合并
 export function mergeRecursive(source, target) {
-    for (var p in target) {
-        try {
-            if (target[p].constructor == Object) {
-                source[p] = mergeRecursive(source[p], target[p]);
-            } else {
-                source[p] = target[p];
-            }
-        } catch(e) {
-            source[p] = target[p];
-        }
-    }
-    return source;
+	for (var p in target) {
+		try {
+			if (target[p].constructor == Object) {
+				source[p] = mergeRecursive(source[p], target[p]);
+			} else {
+				source[p] = target[p];
+			}
+		} catch (e) {
+			source[p] = target[p];
+		}
+	}
+	return source;
 };
 
 /**
@@ -210,11 +210,11 @@ export function tansParams(params) {
 
 // 验证是否为blob格式
 export async function blobValidate(data) {
-    try {
-      const text = await data.text();
-      JSON.parse(text);
-      return false;
-    } catch (error) {
-      return true;
-    }
+	try {
+		const text = await data.text();
+		JSON.parse(text);
+		return false;
+	} catch (error) {
+		return true;
+	}
 }
