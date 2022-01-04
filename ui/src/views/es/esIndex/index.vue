@@ -170,7 +170,7 @@
     />
 
     <!-- 添加或修改索引管理对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
+    <el-dialog :title="title" :visible.sync="open" width="800px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="名称" prop="indexName">
           <el-input v-model="form.indexName" placeholder="请输入名称" />

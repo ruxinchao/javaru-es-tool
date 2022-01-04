@@ -1,6 +1,7 @@
 package com.javaru.es.controller;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +18,10 @@ import com.javaru.common.core.domain.AjaxResult;
 import com.javaru.common.core.text.Convert;
 import com.javaru.common.enums.BusinessType;
 import com.javaru.es.domain.EsIndex;
+import com.javaru.es.domain.EsIndexColumn;
 import com.javaru.es.service.IEsIndexOptService;
 import com.javaru.es.service.IEsIndexService;
+import com.javaru.es.vo.IndexFieldVo;
 import com.javaru.generator.domain.GenTable;
 
 /**
@@ -47,10 +50,16 @@ public class EsApiController extends BaseController {
 			return AjaxResult.success(transformData(esIndexOptService.getAllIndexs(indexName)));
 		}
 		List<String> indexList = esIndexOptService.getAllIndexs(indexName);
-		for (EsIndex esIndex2 : list) {
-			indexList.remove(esIndex2.getIndexName());
+		List<String> resList = new ArrayList<String>();
+		aaa:for (String string : indexList) {
+			for (EsIndex esIndex2 : list) {
+				if(string.equals(esIndex2.getIndexName())) {
+					continue aaa;
+				}
+			}
+			resList.add(string);
 		}
-		return AjaxResult.success(transformData(indexList));
+		return AjaxResult.success(transformData(resList));
 	}
 
 	/**
@@ -67,6 +76,30 @@ public class EsApiController extends BaseController {
 			esIndex.setIndexName(indexName);
 			esIndex.setIndexShowName(indexName);
 			esIndex.setStatus("0");
+			esIndex.setCreateBy(this.getUsername());
+			esIndex.setCreateTime(new Date());
+			esIndex.setUpdateBy(this.getUsername());
+			esIndex.setUpdateTime(new Date());
+			esIndex.setRemark("ES导入");
+	
+			List<IndexFieldVo> columnList = esIndexOptService.getIndexFieldAll(indexName);
+			List<EsIndexColumn> esIndexColumnList = new ArrayList<EsIndexColumn>();
+			for (IndexFieldVo vo : columnList) {
+				EsIndexColumn column = new EsIndexColumn();
+				column.setColumnName(vo.getName());
+				column.setColumnType(vo.getType());
+				column.setColumnShowName(vo.getName());
+				column.setColumnFormat(vo.getFormat());
+				column.setCreateBy(this.getUsername());
+				column.setCreateTime(new Date());
+				column.setUpdateBy(this.getUsername());
+				column.setUpdateTime(new Date());
+				column.setRemark("ES导入");
+				column.setSort(columnList.indexOf(vo)+0L);
+				
+				esIndexColumnList.add(column);
+			}
+			esIndex.setEsIndexColumnList(esIndexColumnList);
 			esIndexService.insertEsIndex(esIndex);
 		}
 		

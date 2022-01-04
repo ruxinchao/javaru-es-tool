@@ -53,6 +53,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         from es_index a
         left join es_index_column b on b.index_id = a.index_id
         where a.index_id = #{indexId}
+        ORDER BY sub_sort,sub_column_type
     </select>
         
     <insert id="insertEsIndex" parameterType="EsIndex" useGeneratedKeys="true" keyProperty="indexId">

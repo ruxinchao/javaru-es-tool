@@ -54,7 +54,7 @@
 </template>
 
 <script>
-import { indexList } from "@/api/es/esIndex";
+import { indexList, importIndex } from "@/api/es/esIndex";
 export default {
   data() {
     return {
@@ -81,7 +81,8 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      this.tables = selection.map((item) => item.tableName);
+      debugger;
+      this.tables = selection.map((item) => item.indexName);
     },
     // 查询表数据
     getList() {
@@ -108,7 +109,7 @@ export default {
         this.$modal.msgError("请选择要导入的表");
         return;
       }
-      importTable({ tables: tableNames }).then((res) => {
+      importIndex({ indexs: tableNames }).then((res) => {
         this.$modal.msgSuccess(res.msg);
         if (res.code === 200) {
           this.visible = false;

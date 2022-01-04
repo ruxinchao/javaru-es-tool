@@ -60,3 +60,12 @@ export function indexList(query) {
     params: query
   })
 }
+
+// 查询索引列表排除 已经导入的
+export function importIndex(data) {
+  return request({
+    url: '/es/esApi/importIndex',
+    method: 'post',
+    params: data
+  })
+}
