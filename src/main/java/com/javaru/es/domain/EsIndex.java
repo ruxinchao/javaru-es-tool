@@ -3,6 +3,8 @@ package com.javaru.es.domain;
 import java.util.List;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.javaru.common.annotation.Excel;
 import com.javaru.common.core.domain.BaseEntity;
 
@@ -32,6 +34,7 @@ public class EsIndex extends BaseEntity
     private String status;
 
     /** 索引字段信息 */
+    @TableField(exist=false)
     private List<EsIndexColumn> esIndexColumnList;
 
     public void setIndexId(Long indexId) 

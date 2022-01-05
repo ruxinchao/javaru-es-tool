@@ -152,6 +152,30 @@
           <el-button
             size="mini"
             type="text"
+            icon="el-icon-setting"
+            @click="handleUpdateColumn(scope.row)"
+            v-hasPermi="['es:esIndex:edit']"
+            >字段设置</el-button
+          >
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-s-tools"
+            @click="handleUpdate(scope.row)"
+            v-hasPermi="['es:esIndex:edit']"
+            >菜单设置</el-button
+          >
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-refresh"
+            @click="handleDelete(scope.row)"
+            v-hasPermi="['es:esIndex:remove']"
+            >同步</el-button
+          >
+          <el-button
+            size="mini"
+            type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['es:esIndex:remove']"
@@ -168,12 +192,20 @@
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
-
-    <!-- 添加或修改索引管理对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="800px" append-to-body>
+    <!--添加和编辑基础信息-->
+    <el-dialog
+      :title="title"
+      :visible.sync="openInfo"
+      width="800px"
+      append-to-body
+    >
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="名称" prop="indexName">
-          <el-input v-model="form.indexName" placeholder="请输入名称" />
+          <el-input
+            v-model="form.indexName"
+            placeholder="请输入名称"
+            :disabled="disabled"
+          />
         </el-form-item>
         <el-form-item label="显示名称" prop="indexShowName">
           <el-input v-model="form.indexShowName" placeholder="请输入显示名称" />
@@ -195,7 +227,22 @@
             placeholder="请输入内容"
           />
         </el-form-item>
-        <el-divider content-position="center">索引字段信息</el-divider>
+      </el-form>
+
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitForm">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 添加或修改索引管理对话框 -->
+    <el-dialog
+      title="索引字段设置"
+      :visible.sync="open"
+      width="800px"
+      append-to-body
+    >
+      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-row :gutter="10" class="mb8">
           <el-col :span="1.5">
             <el-button
@@ -212,62 +259,68 @@
               icon="el-icon-delete"
               size="mini"
               @click="handleDeleteEsIndexColumn"
-              >删除</el-button
+              >删除（仅删数据库，ES字段不删）</el-button
             >
           </el-col>
         </el-row>
-        <el-table
-          :data="esIndexColumnList"
-          :row-class-name="rowEsIndexColumnIndex"
-          @selection-change="handleEsIndexColumnSelectionChange"
-          ref="esIndexColumn"
-        >
-          <el-table-column type="selection" width="50" align="center" />
-          <el-table-column
-            label="序号"
-            align="center"
-            prop="index"
-            width="50"
-          />
-          <el-table-column label="列名称" prop="columnName">
-            <template slot-scope="scope">
-              <el-input
-                v-model="scope.row.columnName"
-                placeholder="请输入列名称"
-              />
-            </template>
-          </el-table-column>
-          <el-table-column label="显示名称" prop="columnShowName">
-            <template slot-scope="scope">
-              <el-input
-                v-model="scope.row.columnShowName"
-                placeholder="请输入显示名称"
-              />
-            </template>
-          </el-table-column>
-          <el-table-column label="列类型" prop="columnType">
-            <template slot-scope="scope">
-              <el-input
-                v-model="scope.row.columnType"
-                placeholder="请输入列类型"
-              />
-            </template>
-          </el-table-column>
-          <el-table-column label="列格式" prop="columnFormat">
-            <template slot-scope="scope">
-              <el-input
-                v-model="scope.row.columnFormat"
-                placeholder="请输入列格式"
-              />
-            </template>
-          </el-table-column>
-          <el-table-column label="排序" prop="sort">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.sort" placeholder="请输入排序" />
-            </template>
-          </el-table-column>
-        </el-table>
+        <div class="el-dialog-div">
+          <el-table
+            :data="esIndexColumnList"
+            :row-class-name="rowEsIndexColumnIndex"
+            @selection-change="handleEsIndexColumnSelectionChange"
+            ref="esIndexColumn"
+          >
+            <el-table-column type="selection" width="50" align="center" />
+            <el-table-column
+              label="序号"
+              align="center"
+              prop="index"
+              width="50"
+            />
+            <el-table-column label="列名称" prop="columnName">
+              <template slot-scope="scope">
+                <el-input
+                  v-model="scope.row.columnName"
+                  placeholder="请输入列名称"
+                  :disabled="getDisabled(scope.row)"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="显示名称" prop="columnShowName">
+              <template slot-scope="scope">
+                <el-input
+                  v-model="scope.row.columnShowName"
+                  placeholder="请输入显示名称"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="列类型" prop="columnType">
+              <template slot-scope="scope">
+                <el-input
+                  v-model="scope.row.columnType"
+                  placeholder="请输入列类型"
+                  :disabled="getDisabled(scope.row)"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="列格式" prop="columnFormat">
+              <template slot-scope="scope">
+                <el-input
+                  v-model="scope.row.columnFormat"
+                  placeholder="请输入列格式"
+                  :disabled="getDisabled(scope.row)"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="排序" prop="sort">
+              <template slot-scope="scope">
+                <el-input v-model="scope.row.sort" placeholder="请输入排序" />
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
       </el-form>
+
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
@@ -318,8 +371,11 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
+      openInfo: false,
       // 状态字典
       statusOptions: [],
+      //禁用页面元素
+      disabled: false,
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -359,6 +415,7 @@ export default {
     // 取消按钮
     cancel() {
       this.open = false;
+      this.openInfo = false;
       this.reset();
     },
     // 表单重置
@@ -396,11 +453,24 @@ export default {
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
-      this.open = true;
+      this.disabled = false;
+      this.openInfo = true;
       this.title = "添加索引管理";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
+      this.reset();
+      this.disabled = true;
+      const indexId = row.indexId || this.ids;
+      getEsIndex(indexId).then((response) => {
+        this.form = response.data;
+        this.esIndexColumnList = response.data.esIndexColumnList;
+        this.openInfo = true;
+        this.title = "修改索引管理";
+      });
+    },
+    /**设置列按钮操作 */
+    handleUpdateColumn(row) {
       this.reset();
       const indexId = row.indexId || this.ids;
       getEsIndex(indexId).then((response) => {
@@ -423,12 +493,14 @@ export default {
             updateEsIndex(this.form).then((response) => {
               this.$modal.msgSuccess("修改成功");
               this.open = false;
+              this.openInfo = false;
               this.getList();
             });
           } else {
             addEsIndex(this.form).then((response) => {
               this.$modal.msgSuccess("新增成功");
               this.open = false;
+              this.openInfo = false;
               this.getList();
             });
           }
@@ -504,6 +576,20 @@ export default {
         })
         .catch(() => {});
     },
+    //列设置的时候判断是否禁用字段
+    getDisabled(data) {
+      if (data && data.columnId > 0) {
+        return true;
+      }
+      return false;
+    },
   },
 };
 </script>
+
+<style rel="stylesheet/scss" lang="scss" scop>
+.el-dialog-div {
+  overflow: auto;
+  height: 60vh;
+}
+</style>

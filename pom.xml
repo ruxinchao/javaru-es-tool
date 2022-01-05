@@ -21,8 +21,21 @@
 		<oshi.version>5.8.0</oshi.version>
 		<jna.version>5.8.0</jna.version>
 		<javaru.version>3.6.0</javaru.version>
+		<mybatisplus.version>3.4.2</mybatisplus.version>
 	</properties>
 	<dependencies>
+		<!--Mybatis-plus支持 -->
+		<dependency>
+			<groupId>com.baomidou</groupId>
+			<artifactId>mybatis-plus-boot-starter</artifactId>
+			<version>${mybatisplus.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.baomidou</groupId>
+					<artifactId>mybatis-plus-generator</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 		<!-- Mysql驱动包 -->
 		<dependency>
 			<groupId>mysql</groupId>

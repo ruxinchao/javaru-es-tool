@@ -1,6 +1,8 @@
 package com.javaru.es.service;
 
 import java.util.List;
+
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.javaru.es.domain.EsIndex;
 
 /**
@@ -9,7 +11,7 @@ import com.javaru.es.domain.EsIndex;
  * @author javaru
  * @date 2021-12-31
  */
-public interface IEsIndexService 
+public interface IEsIndexService  extends IService<EsIndex>
 {
     /**
      * 查询索引管理

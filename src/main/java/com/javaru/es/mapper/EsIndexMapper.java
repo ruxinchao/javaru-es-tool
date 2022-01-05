@@ -1,6 +1,8 @@
 package com.javaru.es.mapper;
 
 import java.util.List;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.javaru.es.domain.EsIndex;
 import com.javaru.es.domain.EsIndexColumn;
 
@@ -10,7 +12,7 @@ import com.javaru.es.domain.EsIndexColumn;
  * @author javaru
  * @date 2021-12-31
  */
-public interface EsIndexMapper 
+public interface EsIndexMapper extends BaseMapper<EsIndex>
 {
     /**
      * 查询索引管理
