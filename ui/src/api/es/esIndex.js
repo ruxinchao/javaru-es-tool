@@ -52,6 +52,16 @@ export function exportEsIndex(query) {
   })
 }
 
+// 同步索引
+export function synEsIndex(data) {
+  return request({
+    url: '/es/esApi/synIndexs',
+    method: 'post',
+    params: data
+  })
+}
+
+
 // 查询索引列表排除 已经导入的
 export function indexList(query) {
   return request({
@@ -67,5 +77,20 @@ export function importIndex(data) {
     url: '/es/esApi/importIndex',
     method: 'post',
     params: data
+  })
+}
+
+// 查询索引列类型
+export function getColumnTypeList() {
+  return request({
+    url: '/es/esApi/getColumnTypeList',
+    method: 'get'
+  })
+}
+// 查询索引列format
+export function getColumnFormatList() {
+  return request({
+    url: '/es/esApi/getColumnFormatList',
+    method: 'get'
   })
 }

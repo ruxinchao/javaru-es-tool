@@ -15,8 +15,11 @@ import com.javaru.common.utils.StringUtils;
 import com.javaru.es.domain.EsIndex;
 import com.javaru.es.domain.EsIndexColumn;
 import com.javaru.es.mapper.EsIndexMapper;
+import com.javaru.es.service.IEsIndexOptService;
 import com.javaru.es.service.IEsIndexService;
 import com.javaru.es.util.ExceptionUtils;
+import com.javaru.es.vo.IndexFieldVo;
+import com.javaru.es.vo.request.IndexAddRequest;
 
 /**
  * 索引管理Service业务层处理
@@ -28,6 +31,9 @@ import com.javaru.es.util.ExceptionUtils;
 public class EsIndexServiceImpl extends ServiceImpl<EsIndexMapper, EsIndex> implements IEsIndexService {
 	@Autowired
 	private EsIndexMapper esIndexMapper;
+
+	@Autowired
+	private IEsIndexOptService esIndexOptService;
 
 	/**
 	 * 查询索引管理
@@ -62,6 +68,18 @@ public class EsIndexServiceImpl extends ServiceImpl<EsIndexMapper, EsIndex> impl
 	public int insertEsIndex(EsIndex esIndex) {
 		uniqueDetection(esIndex);
 		esIndex.setCreateTime(DateUtils.getNowDate());
+		IndexAddRequest indexAddRequest = new IndexAddRequest();
+		if (esIndexOptService.existsIndex(esIndex.getIndexName())) {//索引在Es中存在，同步股过来
+			int rows = esIndexMapper.insertEsIndex(esIndex);
+			insertEsIndexColumn(esIndex);
+			return rows;
+		}
+		indexAddRequest.setIndexName(esIndex.getIndexName());
+		indexAddRequest.setFieldList(esIndexOptService.getDefaultField(indexAddRequest.getFieldList()));
+		String index = esIndexOptService.creatIndex(esIndex.getIndexName(), indexAddRequest);
+		if (StringUtils.isBlank(index)) {
+			ExceptionUtils.throwBizException("创建索引异常");
+		}
 		int rows = esIndexMapper.insertEsIndex(esIndex);
 		insertEsIndexColumn(esIndex);
 		return rows;
@@ -92,6 +110,11 @@ public class EsIndexServiceImpl extends ServiceImpl<EsIndexMapper, EsIndex> impl
 	@Transactional
 	@Override
 	public int deleteEsIndexByIndexIds(Long[] indexIds) {
+		for (Long indexId : indexIds) {
+			EsIndex index = esIndexMapper.selectEsIndexByIndexId(indexId);
+			//删除Es
+			esIndexOptService.deleteIndex(index.getIndexName());
+		}
 		esIndexMapper.deleteEsIndexColumnByIndexIds(indexIds);
 		return esIndexMapper.deleteEsIndexByIndexIds(indexIds);
 	}
@@ -104,6 +127,9 @@ public class EsIndexServiceImpl extends ServiceImpl<EsIndexMapper, EsIndex> impl
 	 */
 	@Override
 	public int deleteEsIndexByIndexId(Long indexId) {
+		EsIndex index = esIndexMapper.selectEsIndexByIndexId(indexId);
+		//删除Es
+		esIndexOptService.deleteIndex(index.getIndexName());
 		esIndexMapper.deleteEsIndexColumnByIndexId(indexId);
 		return esIndexMapper.deleteEsIndexByIndexId(indexId);
 	}
@@ -118,9 +144,21 @@ public class EsIndexServiceImpl extends ServiceImpl<EsIndexMapper, EsIndex> impl
 		Long indexId = esIndex.getIndexId();
 		if (StringUtils.isNotNull(esIndexColumnList)) {
 			List<EsIndexColumn> list = new ArrayList<EsIndexColumn>();
+			List<IndexFieldVo> fieldList = new ArrayList<IndexFieldVo>();
 			for (EsIndexColumn esIndexColumn : esIndexColumnList) {
 				esIndexColumn.setIndexId(indexId);
+				Long columnId = esIndexColumn.getColumnId();
+				if(columnId == null) { //说明是新增
+					IndexFieldVo vo = new IndexFieldVo();
+					vo.setName(esIndexColumn.getColumnName());
+					vo.setType(esIndexColumn.getColumnType());
+					vo.setFormat(esIndexColumn.getColumnFormat());
+					fieldList.add(vo);
+				}
 				list.add(esIndexColumn);
+			}
+			if (fieldList.size() > 0) {// 新增ES列 
+				esIndexOptService.addIndexFields(esIndex.getIndexName(), fieldList);
 			}
 			if (list.size() > 0) {
 				esIndexMapper.batchEsIndexColumn(list);

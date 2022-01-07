@@ -169,7 +169,7 @@
             size="mini"
             type="text"
             icon="el-icon-refresh"
-            @click="handleDelete(scope.row)"
+            @click="handleSyn(scope.row)"
             v-hasPermi="['es:esIndex:remove']"
             >同步</el-button
           >
@@ -296,20 +296,38 @@
             </el-table-column>
             <el-table-column label="列类型" prop="columnType">
               <template slot-scope="scope">
-                <el-input
+                <el-select
                   v-model="scope.row.columnType"
-                  placeholder="请输入列类型"
+                  placeholder="请选择"
                   :disabled="getDisabled(scope.row)"
-                />
+                >
+                  <el-option
+                    v-for="item in columnTypeList"
+                    clearable
+                    :key="item.val"
+                    :label="item.name"
+                    :value="item.val"
+                  >
+                  </el-option>
+                </el-select>
               </template>
             </el-table-column>
             <el-table-column label="列格式" prop="columnFormat">
               <template slot-scope="scope">
-                <el-input
+                <el-select
                   v-model="scope.row.columnFormat"
-                  placeholder="请输入列格式"
+                  placeholder="请选择"
+                  clearable
                   :disabled="getDisabled(scope.row)"
-                />
+                >
+                  <el-option
+                    v-for="item in columnFormatList"
+                    :key="item.val"
+                    :label="item.name"
+                    :value="item.val"
+                  >
+                  </el-option>
+                </el-select>
               </template>
             </el-table-column>
             <el-table-column label="排序" prop="sort">
@@ -336,9 +354,12 @@ import {
   listEsIndex,
   getEsIndex,
   delEsIndex,
+  synEsIndex,
   addEsIndex,
   updateEsIndex,
   exportEsIndex,
+  getColumnTypeList,
+  getColumnFormatList,
 } from "@/api/es/esIndex";
 import importIndex from "./importIndex";
 
@@ -376,6 +397,9 @@ export default {
       statusOptions: [],
       //禁用页面元素
       disabled: false,
+      //列类型list下拉
+      columnTypeList: [],
+      columnFormatList: [],
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -394,6 +418,8 @@ export default {
   },
   created() {
     this.getList();
+    this.getColumnTypeList();
+    this.getColumnFormatList();
     this.getDicts("sys_normal_disable").then((response) => {
       this.statusOptions = response.data;
     });
@@ -511,7 +537,7 @@ export default {
     handleDelete(row) {
       const indexIds = row.indexId || this.ids;
       this.$confirm(
-        '是否确认删除索引管理编号为"' + indexIds + '"的数据项?',
+        '是否删除编号为"' + indexIds + '"的数据项(同步删除ES的索引)?',
         "警告",
         {
           confirmButtonText: "确定",
@@ -524,7 +550,28 @@ export default {
         })
         .then(() => {
           this.getList();
-          this.msgSuccess("删除成功");
+          this.$modal.msgSuccess("删除成功");
+        })
+        .catch(() => {});
+    },
+    /**同步索引 */
+    handleSyn(row) {
+      const indexIds = row.indexId || this.ids;
+      this.$confirm(
+        '是否确认同步索引管理编号为"' + indexIds + '"的数据项?',
+        "警告",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        }
+      )
+        .then(function () {
+          return synEsIndex({ indexId: indexIds });
+        })
+        .then(() => {
+          this.getList();
+          this.$modal.msgSuccess("同步成功");
         })
         .catch(() => {});
     },
@@ -582,6 +629,18 @@ export default {
         return true;
       }
       return false;
+    },
+    //获取列类型
+    getColumnTypeList() {
+      getColumnTypeList().then((response) => {
+        this.columnTypeList = response.data;
+      });
+    },
+    //获取列类型
+    getColumnFormatList() {
+      getColumnFormatList().then((response) => {
+        this.columnFormatList = response.data;
+      });
     },
   },
 };
